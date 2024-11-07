@@ -1,10 +1,10 @@
 """Main module defining the autonomous RL optimizer."""
 import copy
 
-import gym
+import gymnasium as gym
 import numpy as np
 import torch
-from gym import spaces
+from gymnasium import spaces
 from torch import optim
 
 
@@ -100,6 +100,7 @@ class Environment(gym.Env):
         self.dataset = dataset
         self.num_steps = num_steps
         self.history_len = history_len
+        #self.seed = seed
 
         self._setup_episode()
         self.num_params = sum(p.numel() for p in self.model.parameters())
@@ -124,11 +125,12 @@ class Environment(gym.Env):
         self.gradients = []
         self.current_step = 0
 
-    def reset(self):
+    def reset(self, seed=None):
+        super().reset(seed=seed)
         self._setup_episode()
         return make_observation(
             None, self.obj_values, self.gradients, self.num_params, self.history_len
-        )
+        ), None
 
     @torch.no_grad()
     def step(self, action):
@@ -172,4 +174,4 @@ class Environment(gym.Env):
         info = {}
 
         self.current_step += 1
-        return observation, reward, done, info
+        return observation, reward, done, False, info
